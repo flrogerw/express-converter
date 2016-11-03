@@ -1,0 +1,27 @@
+{
+  "name": "express-converter",
+  "version": "1.0.0",
+  "description": "Image Magick Overlay Converter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flrogerw1962/express-converter.git"
+  },
+  "author": "gWilli",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flrogerw1962/express-converter/issues"
+  },
+  "homepage": "https://github.com/flrogerw1962/express-converter#readme",
+  "dependencies": {
+    "aws-sdk": "^2.6.14",
+    "buffers": "^0.1.1",
+    "child_process": "^1.0.2",
+    "events": "^1.1.1",
+    "image-size": "^0.5.0",
+    "util": "^0.10.3"
+  }
+}
