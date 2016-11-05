@@ -16,8 +16,8 @@ var Converter = function() {
 
     var self = this;
     s3.getObject({
-      Bucket : processData.s3_bucket,
-      Key : processData.s3_key
+      Bucket : processData.image.bucket,
+      Key : processData.image.key
     }, (err, data) => {
       if(err){
         self.emit('error', err.message);// RETURN ERROR JSON HERE ?????
@@ -41,29 +41,28 @@ let hbsContext = [];
 this.imageLoop = () => {
 
 	let product = products.shift();
-	let file = require('fs').createWriteStream('./tmp/'+product[image.orientation+'_overlay_image']);
+	let file = require('fs').createWriteStream('./tmp/'+product.overlay_name);
   
 	s3.getObject({
-			Key: product.path+product[image.orientation+'_overlay_image'],
-			Bucket: product.bucket
+			Key: product.overlay_key,
+			Bucket: product.overlay_bucket
 			}).on('httpDone', () => {
 
 				let convertArgs = self.setConvertArgs(product, image);
 				let uploadOptions = {
-					Key: image.location + '/' + Math.floor(Math.random()*1001) + Date.now() + '.jpg',
-					Bucket: image.bucket
+					Key: product.save_key,
+					Bucket: product.save_bucket
 				};
 
 				self.createImage( image.buffer, convertArgs, uploadOptions).then(data => {
 
-					hbsContext.push({url:data.Location, text:product.name});
 					if(products.length == 0)
 						self.emit('done', hbsContext);
-            return;
+            					return;
 					this.imageLoop();
 				}).catch(err => {
 						self.emit('error', err);
-            return;
+            					return;
 			});
 	}).createReadStream().pipe(file);
 }
@@ -79,22 +78,22 @@ this.imageLoop();
 this.setConvertArgs = ( product, image ) => {
 
 	let convertArgs = [];
-	let dimensions = sizeOf('./tmp/'+product[image.orientation+'_overlay_image']);
+	let dimensions = sizeOf('./tmp/'+product.overlay_name);
 	let imageSize = dimensions.width+'x'+dimensions.height;
 	let x = image.width / 2;
 	let y = image.height / 2;
 	while(x > 0 && y > 0) {
 		x -=1;
-		y -= product[image.orientation+'_ratio'];
+		y -= product.ratio;
 	}
 
 	let cropInfo = (image.width-(2*Math.max(0,Math.floor(x)))) + 'x' + (image.height-(2*Math.max(0,Math.floor(y)))) + '+' + Math.max(0,Math.floor(x)) + '+' + Math.max(0,Math.floor(y));
 
 	convertArgs.push( '-size', imageSize, 'xc:none');
-	convertArgs.push( '(','-', '-crop', cropInfo, '-resize', product[image.orientation+'_resize'],')' );
-	convertArgs.push( '-geometry', product[image.orientation+'_geometry']);
+	convertArgs.push( '(','-', '-crop', cropInfo, '-resize', product.resize,')' );
+	convertArgs.push( '-geometry', product.geometry);
 	convertArgs.push( '-composite');
-	convertArgs.push( './tmp/'+product[image.orientation+'_overlay_image'] );
+	convertArgs.push( './tmp/'+product.overlay_name );
 	convertArgs.push( '-composite');
 	convertArgs.push('jpg:-');
 	return(convertArgs);
