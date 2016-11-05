@@ -36,7 +36,6 @@ var Converter = function() {
 this.processImages = (image, products) => {
 
 let self = this;
-let hbsContext = [];
 
 this.imageLoop = () => {
 
@@ -57,7 +56,7 @@ this.imageLoop = () => {
 				self.createImage( image.buffer, convertArgs, uploadOptions).then(data => {
 
 					if(products.length == 0)
-						self.emit('done', hbsContext);
+						self.emit('done');
             					return;
 					this.imageLoop();
 				}).catch(err => {
